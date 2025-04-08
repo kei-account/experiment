@@ -284,11 +284,10 @@ function uploadToGitHub(csvData) {
   });
 }
 
-const jsPsych = initJsPsych({
-  on_finish: () => {
-    const csv = jsPsych.data.get().csv();
-    uploadToGitHub(csv); // GitHubへアップロード！
-  }
+jsPsych.on_finish = () => {
+  const csv = jsPsych.data.get().csv();
+  uploadToGitHub(csv); // GitHubへアップロード！
+};
 });
 
 </script>
