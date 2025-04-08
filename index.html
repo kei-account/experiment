@@ -287,8 +287,7 @@ function uploadToGitHub(csvData) {
 jsPsych.on_finish = () => {
   const csv = jsPsych.data.get().csv();
   uploadToGitHub(csv); // GitHubへアップロード！
-};
-});
+}
 
 </script>
 
