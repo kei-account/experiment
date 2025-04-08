@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -36,6 +35,47 @@ const jsPsych = initJsPsych({
     a.click();
   }
 });
+
+const GITHUB_TOKEN = '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'; // ここにあなたのPATを入れる（注意：セキュリティに注意！）
+const REPO_OWNER = 'kei-account';
+const REPO_NAME = 'experiment';
+const FILE_PATH = 'data/jspsych_results.csv'; // アップロード先のパス
+
+function uploadToGitHub(csvData) {
+  const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+
+  // base64にエンコード
+  const encodedContent = btoa(unescape(encodeURIComponent(csvData)));
+
+  // アップロード内容
+  const payload = {
+    message: 'Add jsPsych result',
+    content: encodedContent
+  };
+
+  fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${GITHUB_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('✅ アップロード完了:', data);
+    alert("結果がGitHubにアップロードされました！");
+  })
+  .catch(error => {
+    console.error('❌ アップロード失敗:', error);
+    alert("アップロード中にエラーが発生しました。");
+  });
+}
+
+jsPsych.on_finish = () => {
+  const csv = jsPsych.data.get().csv();
+  uploadToGitHub(csv); // GitHubへアップロード！
+};
 
 const subject_id = {
   type: jsPsychSurveyText,
@@ -240,54 +280,16 @@ jsPsych.run([
   `,
   choices: [' ']
 },
-  ...main_timeline,
   {
     type: jsPsychHtmlButtonResponse,
     stimulus: 'お疲れさまでした！結果を自動保存しました。',
     choices: ['終了']
-  }
+  },
+  ...main_timeline,
 ]);
 
-const GITHUB_TOKEN = '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'; // ここにあなたのPATを入れる（注意：セキュリティに注意！）
-const REPO_OWNER = 'kei-account';
-const REPO_NAME = 'experiment';
-const FILE_PATH = 'data/jspsych_results.csv'; // アップロード先のパス
 
-function uploadToGitHub(csvData) {
-  const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
 
-  // base64にエンコード
-  const encodedContent = btoa(unescape(encodeURIComponent(csvData)));
-
-  // アップロード内容
-  const payload = {
-    message: 'Add jsPsych result',
-    content: encodedContent
-  };
-
-  fetch(url, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `token ${GITHUB_TOKEN}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  })
-  .then(response => response.json())
-  .then(data => {
-    console.log('✅ アップロード完了:', data);
-    alert("結果がGitHubにアップロードされました！");
-  })
-  .catch(error => {
-    console.error('❌ アップロード失敗:', error);
-    alert("アップロード中にエラーが発生しました。");
-  });
-}
-
-jsPsych.on_finish = () => {
-  const csv = jsPsych.data.get().csv();
-  uploadToGitHub(csv); // GitHubへアップロード！
-}
 
 </script>
 
