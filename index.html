@@ -247,6 +247,50 @@ jsPsych.run([
     choices: ['終了']
   }
 ]);
+
+const GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN'; // ここにあなたのPATを入れる（注意：セキュリティに注意！）
+const REPO_OWNER = 'kei-account';
+const REPO_NAME = 'experiment';
+const FILE_PATH = 'data/jspsych_results.csv'; // アップロード先のパス
+
+function uploadToGitHub(csvData) {
+  const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+
+  // base64にエンコード
+  const encodedContent = btoa(unescape(encodeURIComponent(csvData)));
+
+  // アップロード内容
+  const payload = {
+    message: 'Add jsPsych result',
+    content: encodedContent
+  };
+
+  fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${GITHUB_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('✅ アップロード完了:', data);
+    alert("結果がGitHubにアップロードされました！");
+  })
+  .catch(error => {
+    console.error('❌ アップロード失敗:', error);
+    alert("アップロード中にエラーが発生しました。");
+  });
+}
+
+const jsPsych = initJsPsych({
+  on_finish: () => {
+    const csv = jsPsych.data.get().csv();
+    uploadToGitHub(csv); // GitHubへアップロード！
+  }
+});
+
 </script>
 
 </body>
